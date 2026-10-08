@@ -130,7 +130,7 @@ function MoldVisual() {
 /** Uma peça vira um lote: o troféu se multiplica numa grade, cada peça ganha um check de entregue e o contador sobe. */
 function VolumeVisual({ on }: { on: boolean }) {
   return (
-    <div className="flex items-center gap-6" aria-hidden>
+    <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:gap-6" aria-hidden>
       <div className="shrink-0">
         <p className="font-display text-[clamp(2.6rem,5vw,3.6rem)] leading-none tracking-[-0.02em] tabular-nums">
           <CountUp to={5000} on={on} duration={2400} />
@@ -139,11 +139,11 @@ function VolumeVisual({ on }: { on: boolean }) {
           <Label>peças no mesmo pedido</Label>
         </p>
       </div>
-      <div className="grid flex-1 grid-cols-8 gap-1.5">
+      <div className="grid w-full flex-1 grid-cols-4 gap-2 sm:grid-cols-8 sm:gap-1.5">
         {Array.from({ length: 32 }, (_, i) => (
           <span
             key={i}
-            className={`why-copy relative grid aspect-square place-items-center rounded-md border ${
+            className={`why-copy relative aspect-square ${i >= 12 ? "hidden sm:grid" : "grid"}  place-items-center rounded-md border ${
               i === 0 ? "border-accent bg-accent/15" : "border-line bg-surface"
             }`}
             style={{ "--i": i } as CSSProperties}

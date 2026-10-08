@@ -28,7 +28,7 @@ export function SurpriseKit({ n }: { n: string }) {
     }
     const t = setTimeout(
       () => (open ? cta : seal).current?.focus({ preventScroll: true }),
-      open ? 2000 : 60,
+      open ? 1200 : 60,
     );
     return () => clearTimeout(t);
   }, [open]);

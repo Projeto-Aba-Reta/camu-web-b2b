@@ -124,7 +124,7 @@ body {
   width: 256px;
   height: 236px;
   margin-inline: auto;
-  transition: transform 0.7s var(--kb-ease);
+  transition: transform 0.4s var(--kb-ease);
 }
 .kbox-glow {
   position: absolute;
@@ -136,7 +136,7 @@ body {
     color-mix(in srgb, var(--color-accent) 26%, transparent),
     transparent
   );
-  transition: opacity 0.9s;
+  transition: opacity 0.5s;
 }
 .kbox-shadow {
   position: absolute;
@@ -147,7 +147,7 @@ body {
   margin-left: -105px;
   border-radius: 50%;
   background: radial-gradient(closest-side, rgb(var(--sh) / 0.7), transparent);
-  transition: transform 0.8s var(--kb-ease), opacity 0.8s;
+  transition: transform 0.45s var(--kb-ease), opacity 0.45s;
 }
 .kbox-body,
 .kbox-lid-out {
@@ -248,7 +248,7 @@ body {
     linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.2));
   clip-path: var(--lid-closed);
   transition:
-    clip-path 0.9s cubic-bezier(0.3, 1.25, 0.5, 1),
+    clip-path 0.5s cubic-bezier(0.3, 1.25, 0.5, 1),
     background-color 0.5s;
 }
 .kbox-lid--l {
@@ -299,8 +299,8 @@ body {
   opacity: 0;
   transform: translate(calc(var(--x) * 0.2), 48px) scale(0.5) rotate(0deg);
   transition:
-    transform 0.9s cubic-bezier(0.3, 1.5, 0.5, 1),
-    opacity 0.35s;
+    transform 0.5s cubic-bezier(0.3, 1.5, 0.5, 1),
+    opacity 0.2s;
 }
 .kbox-float {
   display: block;
@@ -351,7 +351,7 @@ body {
   );
   clip-path: polygon(32% 100%, 68% 100%, 100% 0, 0 0);
   filter: blur(5px);
-  transition: opacity 0.9s, transform 1s var(--kb-ease);
+  transition: opacity 0.5s, transform 0.55s var(--kb-ease);
 }
 .kbox-spark {
   position: absolute;
@@ -384,17 +384,17 @@ body {
   }
   .kbox-rim {
     opacity: 1;
-    transition-delay: 0.2s;
+    transition-delay: 0.1s;
   }
   .kbox-beam {
     opacity: 1;
     transform: none;
-    transition-delay: 0.25s;
+    transition-delay: 0.12s;
   }
   .kbox-item {
     opacity: 1;
     transform: translate(var(--x), var(--y)) scale(1) rotate(var(--r));
-    transition-delay: calc(0.3s + var(--i) * 0.1s);
+    transition-delay: calc(0.15s + var(--i) * 0.06s);
   }
   .kbox-float {
     animation: kbox-float 3.2s ease-in-out infinite alternate;
@@ -646,23 +646,23 @@ body {
     animation: none;
   }
   .kseal-base {
-    animation: kseal-fade 0.3s ease-out forwards;
+    animation: kseal-fade 0.2s ease-out forwards;
   }
   .kseal-l {
-    animation: kseal-fall-l 0.95s cubic-bezier(0.5, 0, 0.8, 0.6) forwards;
+    animation: kseal-fall-l 0.55s cubic-bezier(0.5, 0, 0.8, 0.6) forwards;
   }
   .kseal-r {
-    animation: kseal-fall-r 0.95s cubic-bezier(0.5, 0, 0.8, 0.6) forwards;
+    animation: kseal-fall-r 0.55s cubic-bezier(0.5, 0, 0.8, 0.6) forwards;
   }
   .kseal-ring {
-    animation: kseal-shock 0.7s ease-out forwards;
+    animation: kseal-shock 0.4s ease-out forwards;
   }
   .kseal-shard {
-    animation: kseal-shard 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+    animation: kseal-shard 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
   }
   /* a caixa dá um tranco ao romper */
   .kbox {
-    animation: kbox-jolt 0.45s ease-out;
+    animation: kbox-jolt 0.28s ease-out;
   }
 }
 @keyframes kseal-fade {
