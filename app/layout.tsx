@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { CalButton } from "./cal-button";
+import { FunnelTracker } from "./funnel-tracker";
 import { THEME_INIT } from "./theme";
 import "./globals.css";
 
@@ -67,6 +68,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="grain">
         {children}
         <CalButton />
+        <FunnelTracker />
       </body>
     </html>
   );

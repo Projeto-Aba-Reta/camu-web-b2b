@@ -155,7 +155,7 @@ function VolumeVisual({ on }: { on: boolean }) {
                 pathLength={1}
                 d="M5.5 10.5l3 3 6-6.5"
                 fill="none"
-                stroke="var(--c-accent-ink)"
+                stroke="var(--c-bg)"
                 strokeWidth="2.4"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -307,7 +307,7 @@ function BrazilVisual({ on }: { on: boolean }) {
       <ul className="space-y-3">
         {["Produção em São Paulo", "Entrega em todo o Brasil", "Nota fiscal para sua empresa"].map((t, i) => (
           <li key={t} className="why-tick flex items-center gap-2" style={{ "--i": i } as CSSProperties}>
-            <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-accent text-[9px] text-accent-ink">
+            <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-accent text-[9px] text-bg">
               ✓
             </span>
             <Label>{t}</Label>
@@ -358,7 +358,6 @@ function ReasonCard({ r, i }: { r: Reason; i: number }) {
       className={`why-card group relative flex flex-col overflow-hidden bg-bg p-8 md:p-10 ${on ? "why-on" : ""}`}
     >
       <div className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full bg-accent/0 blur-3xl transition duration-700 group-hover:bg-accent/15" />
-      <span className="font-mono text-[11px] tracking-[0.16em] text-muted">{String(i + 1).padStart(2, "0")}</span>
       <div className="mt-8 flex min-h-[170px] items-center [&>*]:w-full">{r.visual(on)}</div>
       <h3 className="mt-10 font-display text-4xl">{r.k}</h3>
       <p className="mt-3 max-w-md leading-relaxed text-muted">{r.v}</p>

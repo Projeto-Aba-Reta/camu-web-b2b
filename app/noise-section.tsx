@@ -9,7 +9,9 @@ export function NoiseSection() {
   const [on, setOn] = useState(false);
 
   useEffect(() => {
-    const el = ref.current;
+    // observa a lista (o palco da animação) e só dispara quando ela está
+    // quase inteira na tela, para não rodar com só um pedaço visível
+    const el = ref.current?.querySelector(".noise-stage");
     if (!el) return;
     const io = new IntersectionObserver(
       ([e]) => {
@@ -18,7 +20,7 @@ export function NoiseSection() {
           io.disconnect();
         }
       },
-      { threshold: 0.35 },
+      { threshold: 0.8, rootMargin: "0px 0px -15% 0px" },
     );
     io.observe(el);
     return () => io.disconnect();

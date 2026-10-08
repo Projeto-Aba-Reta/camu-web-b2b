@@ -90,7 +90,7 @@ export function SurpriseKit({ n }: { n: string }) {
       <div className="invite" role="region" aria-label="Convite" aria-hidden={!open}>
         <div className="invite-in flex items-start justify-between" style={{ "--d": 0 } as CSSProperties}>
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#3b3a35]">
-            Convite · Nº 001
+            Convite Especial para você
           </p>
           <button
             type="button"
@@ -125,7 +125,7 @@ export function SurpriseKit({ n }: { n: string }) {
             ref={cta}
             type="button"
             {...calTrigger}
-            className="rounded-full bg-bg px-6 py-3.5 text-[15px] font-medium text-accent transition hover:brightness-125"
+            className="rounded-full bg-[#f7efe2] px-6 py-3.5 text-[15px] font-medium text-[#ce6a4b] transition hover:brightness-125"
           >
             Aceitar o convite →
           </button>

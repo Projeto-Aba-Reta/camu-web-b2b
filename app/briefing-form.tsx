@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
+
+import { track } from "./analytics";
 
 const field =
   "w-full rounded-xl border border-line-strong bg-bg px-4 py-3 text-[15px] text-fg outline-none transition placeholder:text-muted/60 focus:border-accent";
@@ -8,10 +10,12 @@ const label = "mb-2 block font-mono text-[11px] uppercase tracking-[0.14em] text
 
 export function BriefingForm() {
   const [sent, setSent] = useState(false);
+  const started = useRef(false);
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     // TODO: conectar a um endpoint (e-mail/CRM). Por enquanto só confirma na tela.
+    track("generate_lead", { method: "briefing_form" });
     setSent(true);
   }
 
@@ -29,6 +33,11 @@ export function BriefingForm() {
   return (
     <form
       onSubmit={onSubmit}
+      onFocus={() => {
+        if (started.current) return;
+        started.current = true;
+        track("form_start", { form: "briefing" });
+      }}
       className="grid gap-5 rounded-3xl border border-line-strong bg-surface p-6 md:grid-cols-2 md:p-10"
     >
       <div>

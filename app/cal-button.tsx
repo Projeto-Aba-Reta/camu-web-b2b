@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 
+import { track } from "./analytics";
 import { CAL_NAMESPACE as NAMESPACE } from "./cal";
 import { useTheme } from "./theme";
 
@@ -58,21 +59,43 @@ export function CalButton() {
     Cal("init", NAMESPACE, { origin: "https://app.cal.com" });
     Cal.config = Cal.config || {};
     Cal.config.forwardQueryParams = true;
+
+    // funil: popup carregado e agendamento concluído (lead)
+    const ns = Cal.ns?.[NAMESPACE];
+    ns?.("on", { action: "linkReady", callback: () => track("booking_opened") });
+    ns?.("on", {
+      action: "bookingSuccessful",
+      callback: () => {
+        track("booking_successful");
+        track("generate_lead", { method: "cal_briefing" });
+      },
+    });
   }, []);
 
   // tema do modal do Cal acompanha o do site
   useEffect(() => {
-    const w = window as unknown as { Cal?: CalFn };
-    const ns = w.Cal?.ns?.[NAMESPACE];
-    ns?.("ui", {
-      theme,
-      hideEventTypeDetails: false,
-      layout: "month_view",
-      cssVarsPerTheme: {
-        light: { "cal-brand": "#ce6a4b" },
-        dark: { "cal-brand": "#2f9e8e" },
-      },
-    });
+    const apply = () => {
+      const w = window as unknown as { Cal?: CalFn };
+      w.Cal?.ns?.[NAMESPACE]?.("ui", {
+        theme,
+        // fundo ao redor do popup sempre transparente (o backdrop do Cal aparece)
+        styles: { body: { background: "transparent" } },
+        hideEventTypeDetails: false,
+        layout: "month_view",
+        cssVarsPerTheme: {
+          light: { "cal-brand": "#ce6a4b" },
+          dark: { "cal-brand": "#2f9e8e" },
+        },
+      });
+    };
+    apply();
+    // reenvia o tema atual no instante em que o popup abre: se o tema mudou depois do
+    // primeiro carregamento, o iframe do Cal ficava com o esquema antigo e pintava fundo opaco
+    const onClick = (e: MouseEvent) => {
+      if ((e.target as Element | null)?.closest?.("[data-cal-link]")) apply();
+    };
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
   }, [theme]);
 
   return null;
