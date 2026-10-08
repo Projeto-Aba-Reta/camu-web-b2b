@@ -9,18 +9,24 @@ export type MeshShape = {
   build: () => THREE.BufferGeometry;
   /** peças planas balançam de frente para a câmera (girando, ficariam de lado) */
   sway?: boolean;
+  /** gira em torno do eixo y: centraliza em x/z = 0 em vez da caixa envolvente */
+  onAxis?: boolean;
 };
 
 /* ---------- utilitários ---------- */
 
 /** Junta várias geometrias numa só (só a posição importa). */
-function mergeGeometries(geos: THREE.BufferGeometry[]) {
+function mergeGeometries(geos: THREE.BufferGeometry[], tinted: boolean[] = []) {
   const flat = geos.map((g) => (g.index ? g.toNonIndexed() : g));
   const total = flat.reduce((n, g) => n + g.attributes.position.count, 0);
   const positions = new Float32Array(total * 3);
+  const tint = new Float32Array(total);
   let o = 0;
-  for (const g of flat) {
+  let v = 0;
+  for (const [k, g] of flat.entries()) {
     const pos = g.attributes.position;
+    if (tinted[k]) tint.fill(1, v, v + pos.count);
+    v += pos.count;
     for (let i = 0; i < pos.count; i++) {
       positions[o++] = pos.getX(i);
       positions[o++] = pos.getY(i);
@@ -29,6 +35,7 @@ function mergeGeometries(geos: THREE.BufferGeometry[]) {
   }
   const out = new THREE.BufferGeometry();
   out.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  if (tinted.some(Boolean)) out.setAttribute("aTint", new THREE.BufferAttribute(tint, 1));
   out.computeVertexNormals();
   return out;
 }
@@ -64,18 +71,45 @@ function roundedRect(w: number, h: number, r: number) {
 
 /* ---------- formas ---------- */
 
-/** Moeda cunhada: borda alta, anel e miolo em relevo nas duas faces. */
-function coin() {
+/** Medalha: disco com borda alta, anel e estrela em relevo, argola e fita em V no topo. */
+function medal() {
   const body = new THREE.LatheGeometry(
-    v2([[0, -0.07], [0.8, -0.07], [0.84, -0.12], [1, -0.12], [1, 0.12], [0.84, 0.12], [0.8, 0.07], [0, 0.07]]),
+    v2([[0, -0.07], [0.8, -0.07], [0.86, -0.12], [1, -0.12], [1, 0.12], [0.86, 0.12], [0.8, 0.07], [0, 0.07]]),
     96,
   );
-  const faces = [1, -1].flatMap((s) => [
-    part(new THREE.TorusGeometry(0.5, 0.035, 8, 64), [0, 0.07 * s, 0], [Math.PI / 2, 0, 0]),
-    part(new THREE.CylinderGeometry(0.2, 0.2, 0.1, 32), [0, 0.09 * s, 0]),
-  ]);
-  const geo = mergeGeometries([body, ...faces]);
-  geo.rotateX(Math.PI / 2); // em pé, de frente
+  // disco e anel no plano XY (de frente para a câmera)
+  const disc = [body, ...[1, -1].map((s) => part(new THREE.TorusGeometry(0.68, 0.035, 8, 64), [0, 0.07 * s, 0], [Math.PI / 2, 0, 0]))];
+  const front = mergeGeometries(disc);
+  front.rotateX(Math.PI / 2);
+
+  const star = new THREE.Shape();
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 ? 0.2 : 0.5;
+    const a = Math.PI / 2 + (i * Math.PI) / 5;
+    const x = Math.cos(a) * r;
+    const y = Math.sin(a) * r;
+    if (i) star.lineTo(x, y);
+    else star.moveTo(x, y);
+  }
+  const relief = { depth: 0.07, bevelEnabled: false };
+  const stars = [
+    part(new THREE.ExtrudeGeometry(star, relief), [0, 0, 0.07]),
+    part(new THREE.ExtrudeGeometry(star, relief), [0, 0, -0.14], [0, 0, Math.PI]),
+  ];
+
+  // argola e fita (duas tiras que se encontram na argola)
+  const loop = part(new THREE.TorusGeometry(0.11, 0.04, 8, 32), [0, 1.1, 0]);
+  const ribbon = [1, -1].map((s) => {
+    const len = 1.1;
+    const t = 0.32 * s;
+    return part(new THREE.BoxGeometry(0.36, len, 0.05), [-Math.sin(t) * (len / 2) + 0, 1.2 + Math.cos(t) * (len / 2), 0], [0, 0, t]);
+  });
+
+  // a fita (aTint = 1) ganha a cor própria do shader em vez do dourado da peça
+  const geo = mergeGeometries(
+    [front, ...stars, loop, ...ribbon],
+    [false, false, false, false, true, true],
+  );
   geo.rotateY(-0.35);
   return geo;
 }
@@ -239,7 +273,6 @@ function gear() {
   return geo;
 }
 
-/** A espiral da marca (cauda de camaleão), extrudada como tubo. */
 function spiral() {
   const pts: THREE.Vector3[] = [];
   const turns = 1.6;
@@ -259,10 +292,10 @@ function spiral() {
 
 /** Formas livres, por chave (`shape` em hero-pieces.ts). */
 export const MESH_SHAPES: Record<string, MeshShape> = {
-  moeda: { build: coin, sway: true },
+  medalha: { build: medal, sway: true },
   "caixa-aberta": { build: giftBox },
   berco: { build: cradle, sway: true },
-  foguete: { build: rocket },
+  foguete: { build: rocket, onAxis: true },
   "cracha-nfc": { build: nfcTag, sway: true },
   "cubo-modular": { build: modularCube },
   engrenagem: { build: gear, sway: true },

@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { PIECES } from "./hero-pieces";
 import { MESH_SHAPES } from "./hero-shapes";
 import type { Chest } from "./hero-chest";
+import type { Coins } from "./hero-coins";
 import { MODEL_FILES } from "./hero-models";
 
 const AROUND = 128;
@@ -14,6 +15,10 @@ const LID_OPEN = (112 * Math.PI) / 180;
 const ACCENT = { dark: "#2f9e8e", light: "#ce6a4b" };
 /** luz da luminária acesa */
 const LAMP = { dark: "#ffcf7a", light: "#ff9a2e" };
+/** moedas que caem no baú aberto */
+const COIN = { dark: "#ffd45c", light: "#c9921a" };
+/** fita da medalha (vértices com aTint) */
+const RIBBON = { dark: "#d9363e", light: "#b5232b" };
 
 type Profile = {
   /** altura relativa (1 = peça mais alta) */
@@ -104,26 +109,29 @@ type Prepared = {
 };
 
 /** Centraliza, escala e apoia a geometria em y = -1. */
-function fit(geo: THREE.BufferGeometry, sway: boolean): Prepared {
+function fit(geo: THREE.BufferGeometry, sway: boolean, onAxis = false, scale = 1): Prepared {
   geo.computeBoundingBox();
   const b = geo.boundingBox!;
-  const cx = (b.min.x + b.max.x) / 2;
-  const cz = (b.min.z + b.max.z) / 2;
+  // peças que giram em torno do próprio eixo (foguete) não podem ser centradas pela caixa: as aletas desequilibram
+  const cx = onAxis ? 0 : (b.min.x + b.max.x) / 2;
+  const cz = onAxis ? 0 : (b.min.z + b.max.z) / 2;
   geo.translate(-cx, 0, -cz);
   const pos = geo.attributes.position;
   let maxR = 0;
   for (let i = 0; i < pos.count; i++) maxR = Math.max(maxR, Math.hypot(pos.getX(i), pos.getZ(i)));
   const h = b.max.y - b.min.y;
-  const s = Math.min(2 / h, MAX_RADIUS / maxR);
+  const s = Math.min(2 / h, MAX_RADIUS / maxR) * scale;
+  // peças reduzidas ficam centradas na altura da cena, não coladas na base
+  const y0 = -1 + (2 - h * s) * (scale < 1 ? 0.5 : 0);
   geo.scale(s, s, s);
-  geo.translate(0, -1 - b.min.y * s, 0);
-  return { geo, yMin: -1, yMax: -1 + h * s, sway };
+  geo.translate(0, y0 - b.min.y * s, 0);
+  return { geo, yMin: y0, yMax: y0 + h * s, sway };
 }
 
 function prepareMesh(key: string): Prepared {
   const def = MESH_SHAPES[key];
   if (!def) throw new Error(`[hero] forma desconhecida: "${key}" (veja PROFILES, MESH_SHAPES e MODEL_FILES)`);
-  return fit(def.build(), !!def.sway);
+  return fit(def.build(), !!def.sway, !!def.onAxis);
 }
 
 function buildShape(p: Profile): Float32Array {
@@ -151,16 +159,19 @@ function buildShape(p: Profile): Float32Array {
 
 const VERT = /* glsl */ `
 attribute float aGold;
+attribute float aTint;
 varying vec3 vView;
 varying vec3 vNormal;
 varying vec3 vPos;
 varying float vY;
 varying float vGold;
+varying float vTint;
 void main() {
   vY = position.y;
   vPos = position;
   vNormal = normalMatrix * normal;
   vGold = aGold;
+  vTint = aTint;
   vec4 mv = modelViewMatrix * vec4(position, 1.0);
   vView = mv.xyz;
   gl_Position = projectionMatrix * mv;
@@ -170,6 +181,7 @@ void main() {
 const FRAG = /* glsl */ `
 uniform vec3 uColor;
 uniform vec3 uAccent;
+uniform vec3 uTint;
 uniform float uPrint;
 uniform float uWave;
 uniform float uWaveAmt;
@@ -185,6 +197,7 @@ varying vec3 vNormal;
 varying vec3 vPos;
 varying float vY;
 varying float vGold;
+varying float vTint;
 void main() {
   float yn = (vY - uYMin) / (uYMax - uYMin);
   if (yn > uPrint) discard;
@@ -204,7 +217,7 @@ void main() {
   float w = fwidth(ly) * 1.5;
   float line = smoothstep(0.55, 0.95, f) * (1.0 - smoothstep(0.3, 0.8, w));
 
-  vec3 base = uColor * (1.0 + 0.5 * vGold) + vec3(0.1) * vGold;
+  vec3 base = mix(uColor * (1.0 + 0.5 * vGold) + vec3(0.1) * vGold, uTint, vTint);
   vec3 col = base * diff * (1.0 - 0.24 * line) + vec3(spec) + uAccent * rim * 0.3;
   col += uAccent * exp(-abs(yn - uPrint) * 70.0) * step(uPrint, 0.999) * 1.6;
   // luminária acesa: a luz de dentro atravessa a cúpula e tinge a peça perto da fonte
@@ -271,6 +284,7 @@ export function createScene(
   const uniforms = {
     uColor: { value: colors[opts.initial].clone() },
     uAccent: { value: new THREE.Color(ACCENT[opts.theme]) },
+    uTint: { value: new THREE.Color(RIBBON[opts.theme]) },
     uPrint: { value: opts.reduced ? 1.1 : 0 },
     uWave: { value: 0 },
     uWaveAmt: { value: 0 },
@@ -419,6 +433,7 @@ export function createScene(
   let openAt = 0;
   let flashStart = -1;
   let disposed = false;
+  let coins: Coins | null = null;
   // luminária: acende logo depois de impressa (pisca antes de firmar) e respira de leve
   let glowY: number | null = null;
   let glowStart = -1;
@@ -449,6 +464,25 @@ export function createScene(
   function ensureChest() {
     if (chestState !== "idle") return;
     chestState = "loading";
+    import("./hero-coins")
+      .then((m) => m.loadCoinGeometry().then((g) => m.createCoins(g, COIN[opts.theme])))
+      .then((c) => {
+        if (disposed) {
+          c.dispose();
+          return;
+        }
+        coins = c;
+        spin.add(c.group);
+        // baú já aberto (movimento reduzido): a pilha aparece pronta
+        if (opts.reduced && isChest(shown) && chestData) {
+          c.settle();
+          render();
+        } else if (!opts.reduced && isChest(shown) && lidTarget === LID_OPEN && outStart < 0) {
+          // as moedas chegaram depois de a tampa abrir
+          c.start(performance.now());
+        }
+      })
+      .catch(() => {});
     import("./hero-chest")
       .then((m) => m.loadChest(LID_OPEN))
       .then((c) => {
@@ -490,7 +524,7 @@ export function createScene(
         }
         const stub = modelStubs[key];
         stub.geo.dispose();
-        Object.assign(stub, fit(g, false), { smooth: true });
+        Object.assign(stub, fit(g, !!MODEL_FILES[key].sway, false, MODEL_FILES[key].scale), { smooth: true });
         const rel = MODEL_FILES[key].glow;
         if (rel !== undefined) stub.glowY = stub.yMin + rel * (stub.yMax - stub.yMin);
         modelState[key] = "ready";
@@ -538,6 +572,8 @@ export function createScene(
     uniforms.uWaveAmt.value = 0;
     swayOn = !!free?.sway;
     lidMesh.visible = isChest(i) && !!chestData;
+    coins?.reset();
+    if (opts.reduced && isChest(i) && chestData) coins?.settle();
     lidVel = 0;
     openAt = 0;
     flashStart = -1;
@@ -617,6 +653,7 @@ export function createScene(
         openAt = 0;
         lidTarget = LID_OPEN;
         flashStart = now;
+        coins?.start(now);
       }
       if (openAt) busy = true;
       const s = dt / 1000;
@@ -642,6 +679,9 @@ export function createScene(
         busy = true;
       }
     }
+
+    if (coins?.group.visible && outStart < 0) coins.update(now);
+    else if (coins?.group.visible) coins.reset();
 
     if (glowY !== null && !opts.reduced) {
       if (outStart >= 0) {
@@ -751,6 +791,7 @@ export function createScene(
       geo.dispose();
       meshes.forEach((m) => m?.geo.dispose());
       chestData?.lid.dispose();
+      coins?.dispose();
       glowTex.dispose();
       haloMat.dispose();
       poolGeo.dispose();

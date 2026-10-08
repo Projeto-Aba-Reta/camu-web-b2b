@@ -297,7 +297,12 @@ export default function Home() {
         <div className="mx-auto flex max-w-[1320px] flex-col gap-10 px-5 py-14 md:flex-row md:items-end md:justify-between md:px-8">
           <div>
             <Logo size="lg" />
-            <p className="mt-4 text-muted">Feito camada por camada no Brasil.</p>
+            <p className="mt-4 text-muted">
+              Sua <strong className="font-semibold text-accent [[data-theme=light]_&]:text-[#8f3f26]">marca</strong> merece mais que uma entrega.
+              <span className="block">
+                Merece uma <strong className="font-semibold text-accent [[data-theme=light]_&]:text-[#8f3f26]">experiência</strong>.
+              </span>
+            </p>
           </div>
           <ul className="flex flex-wrap gap-x-8 gap-y-3 text-[14px] text-muted">
             {NAV.map((n) => (
@@ -305,9 +310,6 @@ export default function Home() {
                 <a href={n.href} className="transition hover:text-fg">{n.label}</a>
               </li>
             ))}
-            <li>
-              <a href="#briefing" className="text-accent">Briefing</a>
-            </li>
           </ul>
         </div>
         <p className="border-t border-line px-5 py-6 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-muted">

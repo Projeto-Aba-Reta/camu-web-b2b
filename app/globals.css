@@ -15,7 +15,7 @@
   --c-accent: #ce6a4b;     
   --c-accent-hi: #eb9070;
   --c-accent-lo: #a94e32;   
-  --c-accent-ink: #1f120b;
+  --c-accent-ink: var(--c-bg);
   --c-pop: #2f9e8e;
   --kb-in: var(--kb-in);
   --stripe: 255 255 255;
@@ -30,7 +30,7 @@
   --c-bg: #f7efe2; /* creme */
   --c-fg: #2b2620;
   --c-accent: #ce6a4b; /* terracota: CTA e botões */
-  --c-accent-ink: #1f120b;
+  --c-accent-ink: var(--c-bg);
   --c-accent-hi: #e8957a;
   --c-accent-lo: #a94e32;
   --c-pop: #2f9e8e; /* teal Camu */
@@ -567,7 +567,7 @@ body {
   padding: 6px 12px;
   border-radius: 999px;
   background: var(--color-accent);
-  color: rgba(13, 18, 3, 0.9);
+  color: var(--c-bg);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.12em;

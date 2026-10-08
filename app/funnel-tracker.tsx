@@ -36,8 +36,8 @@ export function FunnelTracker() {
       (entries) => {
         for (const e of entries) {
           if (!e.isIntersecting) continue;
-          const name = (e.target as HTMLElement).dataset.funnel!;
-          if (seen.has(name)) continue;
+          const name = SECTIONS.find(([sid]) => sid === (e.target as HTMLElement).id)?.[1];
+          if (!name || seen.has(name)) continue;
           seen.add(name);
           track("section_view", { section: name, step: SECTIONS.findIndex(([, n]) => n === name) + 1 });
           io.unobserve(e.target);
@@ -45,10 +45,9 @@ export function FunnelTracker() {
       },
       { threshold: 0.35 },
     );
-    for (const [id, name] of SECTIONS) {
+    for (const [id] of SECTIONS) {
       const el = document.getElementById(id);
       if (!el) continue;
-      el.dataset.funnel = name;
       io.observe(el);
     }
     cleanups.push(() => io.disconnect());

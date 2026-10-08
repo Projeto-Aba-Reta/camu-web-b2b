@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { HeroScene } from "./hero-scene";
 import { PIECES } from "./hero-pieces";
 import { useTheme } from "./theme";
@@ -45,7 +45,7 @@ function useMorphText(target: string, animate: boolean) {
 
 export function HeroShowcase({ before, after }: { before: ReactNode; after: ReactNode }) {
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [paused, setPaused] = useState(false); // só ligado por prefers-reduced-motion
   const [visible, setVisible] = useState(true);
   const [reduced, setReduced] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -121,8 +121,6 @@ export function HeroShowcase({ before, after }: { before: ReactNode; after: Reac
     return () => clearTimeout(id);
   }, [index, paused, visible]);
 
-  const go = useCallback((i: number) => setIndex(i), []);
-
   return (
     <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-8">
       <div>
@@ -158,43 +156,6 @@ export function HeroShowcase({ before, after }: { before: ReactNode; after: Reac
           aria-label="Animação 3D: objetos impressos se transformando uns nos outros"
           className={`absolute inset-0 h-full w-full ${failed ? "hidden" : ""}`}
         />
-        <div className="absolute bottom-0 right-0 flex items-center gap-1 text-fg">
-          <div className="flex">
-            {PIECES.map((p, i) => (
-              <button
-                key={p.name}
-                type="button"
-                onClick={() => go(i)}
-                aria-label={`Mostrar peça: ${p.name}`}
-                aria-current={i === index}
-                className="group grid h-8 w-4 place-items-center"
-              >
-                <span
-                  className={`h-[7px] rounded-full bg-current transition-all duration-300 ${
-                    i === index ? "w-3.5 opacity-100" : "w-[7px] opacity-30 group-hover:opacity-60"
-                  }`}
-                />
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={() => setPaused((p) => !p)}
-            aria-label={paused ? "Tocar animação" : "Pausar animação"}
-            className="grid h-10 w-10 place-items-center rounded-full border border-line-strong transition hover:border-fg"
-          >
-            {paused ? (
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor" aria-hidden>
-                <path d="M3 1.5v11l9-5.5z" />
-              </svg>
-            ) : (
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor" aria-hidden>
-                <rect x="2" y="1" width="3.5" height="12" rx="1" />
-                <rect x="8.5" y="1" width="3.5" height="12" rx="1" />
-              </svg>
-            )}
-          </button>
-        </div>
       </div>
     </div>
   );

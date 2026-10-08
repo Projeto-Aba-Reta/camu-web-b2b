@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { CalButton } from "./cal-button";
+import CrispChat from "./crisp-chat";
 import { FunnelTracker } from "./funnel-tracker";
 import { THEME_INIT } from "./theme";
 import "./globals.css";
@@ -69,6 +70,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {children}
         <CalButton />
         <FunnelTracker />
+        {process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID && (
+          <CrispChat websiteId={process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID} />
+        )}
       </body>
     </html>
   );
