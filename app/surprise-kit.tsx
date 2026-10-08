@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 
+import { track } from "./analytics";
 import { calTrigger } from "./cal";
 import { KitBox } from "./kit-box";
 
@@ -53,7 +54,10 @@ export function SurpriseKit({ n }: { n: string }) {
             className="kseal"
             aria-label="Romper o lacre e abrir a caixa surpresa"
             tabIndex={open ? -1 : 0}
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              track("surprise_box_open");
+              setOpen(true);
+            }}
           >
             <span className="kseal-ping" aria-hidden />
             <span className="kseal-ring" aria-hidden />
@@ -94,7 +98,10 @@ export function SurpriseKit({ n }: { n: string }) {
           </p>
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              track("surprise_box_close");
+              setOpen(false);
+            }}
             aria-label="Lacrar a caixa de novo"
             className="-mr-1 -mt-1 grid size-8 place-items-center rounded-full border border-[#0d1203]/25 text-lg leading-none text-[#0d1203] transition hover:bg-[#0d1203] hover:text-accent"
           >
@@ -125,6 +132,7 @@ export function SurpriseKit({ n }: { n: string }) {
             ref={cta}
             type="button"
             {...calTrigger}
+            data-source="surprise_box"
             className="rounded-full bg-[#f7efe2] px-6 py-3.5 text-[15px] font-medium text-[#ce6a4b] transition hover:brightness-125"
           >
             Aceitar o convite →

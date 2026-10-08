@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "./analytics";
 import { setTheme, useTheme } from "./theme";
 
 export function ThemeToggle() {
@@ -8,7 +9,10 @@ export function ThemeToggle() {
   return (
     <button
       type="button"
-      onClick={() => setTheme(next)}
+      onClick={() => {
+        track(`theme_toggle_${next}`);
+        setTheme(next);
+      }}
       aria-label={next === "light" ? "Ativar tema claro" : "Ativar tema escuro"}
       title={next === "light" ? "Tema claro" : "Tema escuro"}
       className="grid h-10 w-10 place-items-center rounded-full border border-line-strong text-muted transition hover:text-fg"

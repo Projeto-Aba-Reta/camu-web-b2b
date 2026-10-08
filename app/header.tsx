@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { track } from "./analytics";
 import { calTrigger } from "./cal";
 import { Logo } from "./logo";
 import { NAV } from "./nav";
@@ -41,6 +42,7 @@ export function Header() {
           <button
             type="button"
             {...calTrigger}
+            data-source="header"
             className="rounded-full bg-accent px-5 py-2.5 text-[14px] font-medium text-accent-ink transition hover:brightness-110"
           >
             Agendar briefing
@@ -50,7 +52,10 @@ export function Header() {
             className="grid h-10 w-10 place-items-center rounded-full border border-line-strong lg:hidden"
             aria-label="Menu"
             aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => {
+              track(open ? "menu_close" : "menu_open");
+              setOpen((v) => !v);
+            }}
           >
             <span className="text-lg leading-none">{open ? "×" : "≡"}</span>
           </button>

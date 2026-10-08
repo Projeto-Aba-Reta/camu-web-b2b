@@ -355,6 +355,7 @@ function ReasonCard({ r, i }: { r: Reason; i: number }) {
   return (
     <article
       ref={ref}
+      data-hover={`why_hover_${r.k}`}
       className={`why-card group relative flex flex-col overflow-hidden bg-bg p-8 md:p-10 ${on ? "why-on" : ""}`}
     >
       <div className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full bg-accent/0 blur-3xl transition duration-700 group-hover:bg-accent/15" />

@@ -12,9 +12,10 @@ import { SectorsMarquee } from "./sectors-marquee";
 import { SurpriseKit } from "./surprise-kit";
 import { WhyCamu } from "./why-camu";
 
-const kits: { n: string; tag: string; title: string; text: string; items: KitIcon[] }[] = [
+const kits: { n: string; slug: string; tag: string; title: string; text: string; items: KitIcon[] }[] = [
   {
     n: "01",
+    slug: "boas_vindas",
     tag: "Onboarding",
     title: "Kit de boas-vindas",
     text: "Kit de entrada que o novo cliente ou colaborador abre e fotografa: crachá, porta-objetos e peças com a sua marca.",
@@ -22,6 +23,7 @@ const kits: { n: string; tag: string; title: string; text: string; items: KitIco
   },
   {
     n: "02",
+    slug: "lancamento",
     tag: "Lançamento",
     title: "Lançamento de produto",
     text: "Caixa-conceito com miniatura do produto, objetos temáticos e um detalhe impossível de copiar.",
@@ -29,6 +31,7 @@ const kits: { n: string; tag: string; title: string; text: string; items: KitIco
   },
   {
     n: "03",
+    slug: "creators",
     tag: "Creators",
     title: "Caixa para influenciadores",
     text: "Peças pensadas para virar conteúdo: o vídeo de unboxing já nasce no desenho do kit.",
@@ -36,6 +39,7 @@ const kits: { n: string; tag: string; title: string; text: string; items: KitIco
   },
   {
     n: "04",
+    slug: "vip",
     tag: "Edição numerada",
     title: "Presentes para clientes VIP",
     text: "Edição numerada, acabamento premium e personalização por pessoa. Nada de brinde genérico.",
@@ -43,6 +47,7 @@ const kits: { n: string; tag: string; title: string; text: string; items: KitIco
   },
   {
     n: "05",
+    slug: "evento",
     tag: "Eventos",
     title: "Kits de evento",
     text: "Do credenciamento à lembrança para levar para casa: peças produzidas em escala, de 1 a 5.000 unidades.",
@@ -82,12 +87,12 @@ const steps = [
 ];
 
 const faqs = [
-  ["Preciso ter o arquivo 3D?", "Não. Você pode mandar só a ideia, um rascunho ou referências. Se já tiver o arquivo 3D, ótimo, nós conferimos tudo antes de imprimir."],
-  ["Existe pedido mínimo?", "Não. Produzimos desde 1 unidade (um protótipo ou um presente especial) até 5.000 unidades por pedido."],
-  ["Qual o prazo de um kit de unboxing?", "Depende da complexidade e da quantidade. Depois do briefing já passamos um prazo realista para o seu projeto."],
-  ["Como funciona o preço?", "Depende de quantidade, material e acabamento. Depois do briefing enviamos uma estimativa e, com o conceito aprovado, o orçamento fechado."],
-  ["Emitem nota fiscal?", "Sim, emitimos nota fiscal para pessoa jurídica em todos os pedidos."],
-  ["Entregam em todo o Brasil?", "Sim. Enviamos para um endereço único ou para vários destinatários, com a caixa já montada."],
+  ["arquivo_3d", "Preciso ter o arquivo 3D?", "Não. Você pode mandar só a ideia, um rascunho ou referências. Se já tiver o arquivo 3D, ótimo, nós conferimos tudo antes de imprimir."],
+  ["pedido_minimo", "Existe pedido mínimo?", "Não. Produzimos desde 1 unidade (um protótipo ou um presente especial) até 5.000 unidades por pedido."],
+  ["prazo", "Qual o prazo de um kit de unboxing?", "Depende da complexidade e da quantidade. Depois do briefing já passamos um prazo realista para o seu projeto."],
+  ["preco", "Como funciona o preço?", "Depende de quantidade, material e acabamento. Depois do briefing enviamos uma estimativa e, com o conceito aprovado, o orçamento fechado."],
+  ["nota_fiscal", "Emitem nota fiscal?", "Sim, emitimos nota fiscal para pessoa jurídica em todos os pedidos."],
+  ["entrega_brasil", "Entregam em todo o Brasil?", "Sim. Enviamos para um endereço único ou para vários destinatários, com a caixa já montada."],
 ];
 
 const eyebrow = "font-mono text-[11px] uppercase tracking-[0.18em] text-accent";
@@ -134,6 +139,7 @@ export default function Home() {
                       <button
                         type="button"
                         {...calTrigger}
+                        data-source="hero"
                         className="rounded-full bg-accent px-7 py-3.5 text-[15px] font-medium text-accent-ink transition hover:brightness-110"
                       >
                         Agendar briefing →
@@ -184,7 +190,7 @@ export default function Home() {
           <div className="mt-14 grid gap-px overflow-hidden rounded-3xl border border-line bg-line md:grid-cols-2 lg:grid-cols-3">
             {kits.map((k, i) => (
               <Reveal key={k.n} delay={(i % 3) * 80} className="bg-bg">
-                <article tabIndex={0} className="box-card h-full p-8 outline-none">
+                <article tabIndex={0} data-hover={`kit_open_${k.slug}`} className="box-card h-full p-8 outline-none">
                   <div className="mt-6">
                     <KitBox items={k.items} label={k.tag} />
                   </div>
@@ -211,7 +217,10 @@ export default function Home() {
             <div className="mt-16 grid gap-5 md:grid-cols-2">
               {ideias.map((idea, i) => (
                 <Reveal key={idea.who} delay={(i % 2) * 100} className="h-full">
-                  <article className="group relative h-full overflow-hidden rounded-2xl border border-line bg-bg p-8 md:p-10">
+                  <article
+                    data-hover={`idea_hover_${idea.who}`}
+                    className="group relative h-full overflow-hidden rounded-2xl border border-line bg-bg p-8 md:p-10"
+                  >
                     <div className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full bg-accent/0 blur-3xl transition duration-700 group-hover:bg-accent/15" />
                     <div className="flex items-center justify-between font-mono text-[11px] tracking-[0.16em] text-muted uppercase">
                       <span>{idea.who}</span>
@@ -279,8 +288,8 @@ export default function Home() {
           </Reveal>
           <Reveal delay={100}>
             <div className="divide-y divide-line border-y border-line">
-              {faqs.map(([q, a]) => (
-                <details key={q} className="group py-6">
+              {faqs.map(([key, q, a]) => (
+                <details key={key} data-faq={key} className="group py-6">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-lg [&::-webkit-details-marker]:hidden">
                     {q}
                     <span className="text-2xl text-accent transition group-open:rotate-45">+</span>

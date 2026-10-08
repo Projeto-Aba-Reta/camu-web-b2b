@@ -15,7 +15,8 @@ export function BriefingForm() {
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     // TODO: conectar a um endpoint (e-mail/CRM). Por enquanto só confirma na tela.
-    track("generate_lead", { method: "briefing_form" });
+    track("form_submit_briefing");
+    track("generate_lead", { method: "briefing_form", source: "briefing_form" });
     setSent(true);
   }
 
@@ -36,7 +37,7 @@ export function BriefingForm() {
       onFocus={() => {
         if (started.current) return;
         started.current = true;
-        track("form_start", { form: "briefing" });
+        track("form_start_briefing");
       }}
       className="grid gap-5 rounded-3xl border border-line-strong bg-surface p-6 md:grid-cols-2 md:p-10"
     >

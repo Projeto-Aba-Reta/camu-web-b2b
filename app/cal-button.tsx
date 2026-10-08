@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import { track } from "./analytics";
+import { getBookingSource, track } from "./analytics";
 import { CAL_NAMESPACE as NAMESPACE } from "./cal";
 import { useTheme } from "./theme";
 
@@ -62,12 +62,14 @@ export function CalButton() {
 
     // funil: popup carregado e agendamento concluído (lead)
     const ns = Cal.ns?.[NAMESPACE];
-    ns?.("on", { action: "linkReady", callback: () => track("booking_opened") });
+    // cada evento leva a origem (botão) do clique que abriu o popup
+    ns?.("on", { action: "linkReady", callback: () => track(`booking_opened_${getBookingSource()}`) });
     ns?.("on", {
       action: "bookingSuccessful",
       callback: () => {
-        track("booking_successful");
-        track("generate_lead", { method: "cal_briefing" });
+        const source = getBookingSource();
+        track(`booking_successful_${source}`);
+        track("generate_lead", { method: "cal_briefing", source });
       },
     });
   }, []);

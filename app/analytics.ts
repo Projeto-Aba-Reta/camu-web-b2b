@@ -44,10 +44,31 @@ export function initAnalytics() {
   void load();
 }
 
+/** Nome válido no GA4: minúsculo, sem acento, só [a-z0-9_], começa com letra, até 40 caracteres. */
+function eventName(raw: string): string {
+  const name = raw
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return (/^[a-z]/.test(name) ? name : `e_${name}`).slice(0, 40);
+}
+
+/** O valor/origem vai no próprio nome do evento (ex.: `scroll_depth_50`, `booking_click_hero`). */
 export function track(event: string, params: Params = {}) {
+  const name = eventName(event);
   void load().then(async (analytics) => {
     if (!analytics) return;
     const { logEvent } = await import("firebase/analytics");
-    logEvent(analytics, event, params);
+    logEvent(analytics, name, params);
   });
 }
+
+// Qual botão abriu o agendamento. O Cal avisa "popup carregado"/"agendado" sem dizer de onde veio,
+// então guardamos a origem do último clique para nomear os eventos seguintes do funil.
+let bookingSource = "unknown";
+export const setBookingSource = (source: string) => {
+  bookingSource = source;
+};
+export const getBookingSource = () => bookingSource;
